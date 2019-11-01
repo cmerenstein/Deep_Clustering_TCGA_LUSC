@@ -42,13 +42,6 @@ encoder = (Conv2D(64, kernel_size = (3, 3), activation = 'relu',
     padding = 'same', kernel_initializer = "he_normal"))(encoder)
 encoder = (MaxPooling2D((2, 2), padding = "same"))(encoder)
 
-#encoder = (Conv2D(128, kernel_size = (3, 3), activation = 'relu',
-#    padding = 'same', kernel_initializer = "he_normal"))(encoder)
-#encoder = (MaxPooling2D((2, 2), padding = "same"))(encoder)
-#
-#encoder = (Conv2D(128, kernel_size = (3, 3), activation = 'relu',
-#    padding = 'same', kernel_initializer = "he_normal"))(encoder)
-#
 encoder = Flatten()(encoder)
 flat1 = Dense(1024, activation = 'tanh', kernel_initializer = "he_normal",
         activity_regularizer = l2(0.001))(encoder)
@@ -56,18 +49,18 @@ flat2 = Dense(1024, activation = 'tanh', kernel_initializer = "he_normal",
         activity_regularizer = l2(0.001))(flat1)
 encoder = keras.layers.add([flat1, flat2])
 
-flat3 = Dense(1024, activation = 'tanh', kernel_initializer = "he_normal",
+#flat3 = Dense(1024, activation = 'tanh', kernel_initializer = "he_normal",
+#        activity_regularizer = l2(0.001))(flat2_res)
+#flat3_res = keras.layers.add([flat2_res, flat3])
+
+#flat4 = Dense(1024, activation = 'tanh', kernel_initializer = "he_normal",
+#        activity_regularizer = l2(0.001))(flat3_res)
+#encoder = keras.layers.add([flat3_res, flat4])
+
+flat5 = Dense(1024, activation = 'tanh', kernel_initializer = "he_normal",
         activity_regularizer = l2(0.001))(encoder)
-model = keras.layers.concatenate([encoder, flat3])
+model = keras.layers.concatenate([encoder, flat5])
 model = Reshape((16, 16, 8))(model)
-#
-#model = (Conv2D(128, kernel_size = (3, 3), activation = 'relu', 
-#    padding = 'same', kernel_initializer = "he_normal"))(model) 
-#model = (UpSampling2D((2, 2)))(model)
-#
-#model = (Conv2D(128, kernel_size = (3, 3), activation = 'relu',
-#    padding = 'same', kernel_initializer = "he_normal"))(encoder) 
-#model = (UpSampling2D((2, 2)))(model)
 
 model = (Conv2D(64, kernel_size = (3, 3), activation = 'relu',
     padding = 'same', kernel_initializer = "he_normal"))(model) 
@@ -93,14 +86,14 @@ Encoder = Model(input_image, encoder)
 
 ## we will have Vto train in batches because the whole thing won't fit in memory
 datagen = ImageDataGenerator(featurewise_center=True, rescale = 1./255, validation_split=0.05)
-training = datagen.flow_from_directory("sampled_tiles/test_256_var_filt/", class_mode="input",
-        batch_size=8, target_size=(256, 256), color_mode = "grayscale"      )
-history = model.fit_generator(training, epochs = 50)
+training = datagen.flow_from_directory("sampled_tiles/training_junk_clusters_removed/",
+        class_mode="input", batch_size=8, target_size=(256, 256), color_mode = "grayscale" )
+history = model.fit_generator(training, epochs = 20)
 
-with open("models/model_save_10_15_256px_1024_100k.json", 'w') as out:
+with open("models/model_save_10_25_256px_1024_56k_subset.json", 'w') as out:
     out.write(model.to_json())
 
-with open("models/encoder_save_10_15_256px_1024_100k.json", 'w') as out:
+with open("models/encoder_save_10_25_256px_1024_56k_subset.json", 'w') as out:
     out.write(Encoder.to_json())
 
 b1_lumin = training.next()[0]

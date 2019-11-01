@@ -76,7 +76,25 @@ for ite in range(int(maxiter)):
     index = index + 1 if (index + 1) * batch_size <= y_pred.shape[0] else 0
 
 
-with open("python_clusters.txt", 'w') as out:
+with open("python_clusters_with_training.txt", 'w') as out:
     for i in y_pred:
         out.write(str(i) + '\n')
+
+
+b1 = training.next()[0]
+q=5
+for i in np.asarray(b1):
+    img = np.uint8(np.multiply(np.asarray(i), 255))
+    img = img.reshape(256, 256)
+    Image.fromarray(np.asarray(img)).save("test_" + str(q) + ".png")
+    q += 1
+
+q=5
+for i in model.predict_on_batch(b1)[1]:
+    print(i.shape)
+    img = np.uint8(np.multiply(np.asarray(i), 255))
+    img = img.reshape(256, 256)
+    Image.fromarray(img).save("pred_" + str(q) + ".png")
+    q+=1
+
 
